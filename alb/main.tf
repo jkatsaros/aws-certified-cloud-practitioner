@@ -85,14 +85,7 @@ resource "aws_instance" "ccp-ec2-terraform-1" {
   ami                    = "ami-0103f211a154d64a6"
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.ccp-ec2-ssh-sg-terraform.id, aws_security_group.ccp-ec2-sg-terraform.id]
-  user_data              = <<EOF
-#!/bin/bash
-yum update -y
-yum install -y httpd
-systemctl start httpd
-systemctl enable httpd
-echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html
-EOF
+  user_data              = file("./user-data.txt")
 }
 
 resource "aws_ebs_volume" "ccp-ec2-ebs-terraform-1" {
@@ -110,14 +103,7 @@ resource "aws_instance" "ccp-ec2-terraform-2" {
   ami                    = "ami-0103f211a154d64a6"
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.ccp-ec2-ssh-sg-terraform.id, aws_security_group.ccp-ec2-sg-terraform.id]
-  user_data              = <<EOF
-#!/bin/bash
-yum update -y
-yum install -y httpd
-systemctl start httpd
-systemctl enable httpd
-echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html
-EOF
+  user_data              = file("./user-data.txt")
 }
 
 resource "aws_ebs_volume" "ccp-ec2-ebs-terraform-2" {
