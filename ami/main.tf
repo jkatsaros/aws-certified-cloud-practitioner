@@ -57,6 +57,17 @@ systemctl enable httpd
 EOF
 }
 
+resource "aws_ebs_volume" "ccp-ec2-ebs-terraform" {
+  availability_zone = "us-east-2c"
+  size              = 2
+}
+
+resource "aws_volume_attachment" "ccp-ec2-ebs-attachment-terraform" {
+  device_name = "/dev/sdc"
+  volume_id   = aws_ebs_volume.ccp-ec2-ebs-terraform.id
+  instance_id = aws_instance.ccp-ec2-terraform.id
+}
+
 resource "aws_ami_from_instance" "ccp-ec2-ami-terraform" {
   name               = "ccp-ec2-ami-terraform"
   source_instance_id = aws_instance.ccp-ec2-terraform.id
