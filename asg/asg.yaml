@@ -1,0 +1,78 @@
+---
+Resources:
+  ccp-ec2-asg-lt-cloudformaton:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        InstanceType: t2.micro
+
+  ccp-ec2-asg-cloudformation:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      DesiredCapacity: '2'
+      LaunchTemplate:
+        LaunchTemplateId: !Ref ccp-ec2-asg-lt-cloudformation
+        Version: !GetAtt myLaunchTemplate.LatestVersionNumber
+      MaxSize: '3'
+      MinSize: '1'
+      TargetGroupARNs:
+        - !Ref ccp-ec2-lg-tg-cloudformation
+  
+  ccp-eip-cloudformation:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref ccp-ec2-cloudformation
+
+  ccp-ec2-ssh-sg-cloudformation:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH to Certified Cloud Practitioner EC2 Instances (CloudFormation)
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 22
+        IpProtocol: tcp
+        ToPort: 22
+
+  ccp-ec2-http-sg-cloudformation:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP to Certified Cloud Practitioner EC2 Instances (CloudFormation)
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 80
+        IpProtocol: tcp
+        ToPort: 80
+
+  ccp-ec2-http-lb-sg-cloudformation:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP to Certified Cloud Practitioner EC2 Instances (CloudFormation)
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 80
+        IpProtocol: tcp
+        ToPort: 80
+
+  ccp-ec2-alb-cloudformation:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+
+  ccp-ec2-alb-tg-cloudformation:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 80
+      Protocol: 'HTTP'
+      TargetType: 'instance'
+
+  ccp-ec2-alb-listener-cloudformation:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: 'forward'
+          TargetGroupArn: !Ref ccp-ec2-alb-tg-cloudformation
+      LoadBalancerArn: !Ref ccp-ec2-alb-cloudformation
+      Port: 80
+      Protocol: 'HTTP'
+
+Outputs:
+  ElasticIP:
+    Value: !Ref ccp-eip-cloudformation
